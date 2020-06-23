@@ -5,6 +5,7 @@ import { ButtonToolbar, DropdownItem, DropdownButton } from "react-bootstrap";
 
 class Box extends React.Component {
   selectBox = () => {
+    // call the function from the props
     this.props.selectBox(this.props.row, this.props.col);
   };
   render() {
@@ -12,6 +13,7 @@ class Box extends React.Component {
       <div
         className={this.props.boxClass}
         id={this.props.id}
+        // selectBox not being passed as props as it has its own selectBox function in Box component
         onClick={this.selectBox}
       />
     );
@@ -19,15 +21,19 @@ class Box extends React.Component {
 }
 class Grid extends React.Component {
   render() {
+    // cols passed as props to child component to give width of grid
     const width = this.props.cols * 14;
+    // rows array initialised as empty array
     var rowsArr = [];
-
+    // nested for loop to map an array of data for rows
     var boxClass = "";
     for (var i = 0; i < this.props.rows; i++) {
       for (var j = 0; j < this.props.rows; j++) {
+        // create the id to go along with each box element
         let boxId = i + "_" + j;
-
+        // check to see if box is on or off
         boxClass = this.props.gridFull[i][j] ? "box on" : "box off";
+        // push each box component onto the rows array
         rowsArr.push(
           <Box
             boxClass={boxClass}
@@ -42,6 +48,7 @@ class Grid extends React.Component {
     }
     return (
       <div className="grid" style={{ width: width }}>
+        {/* an array of all the rows */}
         {rowsArr}
       </div>
     );
@@ -56,7 +63,7 @@ class Buttons extends React.Component {
   render() {
     return (
       <div className="center">
-        <ButtonToolbar>
+        <ButtonToolbar className="center">
           <button className="btn btn-default" onClick={this.props.playButton}>
             Play
           </button>
@@ -75,14 +82,16 @@ class Buttons extends React.Component {
           <button className="btn btn-default" onClick={this.props.seed}>
             Seed
           </button>
-          <DropdownButton
-            title="Grid Size"
-            id="size-menu"
-            onSelect={this.handleSelect}
-          >
-            <DropdownItem eventKey="1">20x10</DropdownItem>
-            <DropdownItem eventKey="2">50x30</DropdownItem>
-            <DropdownItem eventKey="3">70x50</DropdownItem>
+          <DropdownButton title="Grid Size" onSelect={this.handleSelect}>
+            <DropdownItem className="drpItm" eventKey="1">
+              25x25
+            </DropdownItem>
+            <DropdownItem className="drpItm" eventKey="2">
+              50x30
+            </DropdownItem>
+            <DropdownItem className="drpItm" eventKey="3">
+              70x50
+            </DropdownItem>
           </DropdownButton>
         </ButtonToolbar>
       </div>
@@ -92,30 +101,39 @@ class Buttons extends React.Component {
 class Main extends React.Component {
   constructor() {
     super();
+    // class variables to start
     this.speed = 100;
     this.rows = 30;
     this.cols = 50;
 
     this.state = {
       generation: 0,
+      // create an array as big as the rows variables and an array as big as the cols variable to create grid
       gridFull: Array(this.rows)
         .fill()
+        // every grid cell is turned off to begin with
         .map(() => Array(this.cols).fill(false)),
     };
   }
-
+// each cell in the grid starts off as unselected (false). Create a method so that when clicked, each cell updates to true.
   selectBox = (row, col) => {
+    // do not update the start directly so create a copy of the array using helper function arrayClone
     let gridCopy = arrayClone(this.state.gridFull);
+    // find the exact square that was clicked and set it to the opposite ( true/false and vice versa)
     gridCopy[row][col] = !gridCopy[row][col];
+    // update using set state
     this.setState({
       gridFull: gridCopy,
     });
   };
-
+// custom feature that creates a random cell configuration that users can run
   seed = () => {
+    // copy the grid
     let gridCopy = arrayClone(this.state.gridFull);
+    // go through every square of the grid and decide to turn on or leave it off
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.cols; j++) {
+        // randomly choose whether a square gets turned on or not
         if (Math.floor(Math.random() * 4) === 1) {
           gridCopy[i][j] = true;
         }
@@ -125,7 +143,7 @@ class Main extends React.Component {
       gridFull: gridCopy,
     });
   };
-
+// start the interval
   playButton = () => {
     clearInterval(this.intervalId);
     this.intervalId = setInterval(this.play, this.speed);
@@ -158,8 +176,8 @@ class Main extends React.Component {
   gridSize = (size) => {
     switch (size) {
       case "1":
-        this.cols = 20;
-        this.rows = 10;
+        this.cols = 25;
+        this.rows = 25;
         break;
       case "2":
         this.cols = 50;
@@ -197,6 +215,7 @@ class Main extends React.Component {
       generation: this.state.generation + 1,
     });
   };
+  // start game on refresh
   componentDidMount() {
     this.seed();
     this.playButton();
@@ -207,7 +226,7 @@ class Main extends React.Component {
       <div>
         <h1>Conway's Game of Life</h1>
         <Buttons
-          playbutton={this.playButton}
+          playButton={this.playButton}
           pauseButton={this.pauseButton}
           slow={this.slow}
           fast={this.fast}
@@ -216,17 +235,46 @@ class Main extends React.Component {
           gridSize={this.gridSize}
         />
         <Grid
+          // pass full grid, rows and columns state variables as props
           gridFull={this.state.gridFull}
           rows={this.rows}
           cols={this.cols}
           selectBox={this.selectBox}
         />
         <h2>Generations: {this.state.generation}</h2>
+        <p>
+          The universe of the Game of Life is an infinite, two-dimensional
+          orthogonal grid of square cells, each of which is in one of two
+          possible states, live or dead, (or populated and unpopulated,
+          respectively). Every cell interacts with its eight neighbours, which
+          are the cells that are horizontally, vertically, or diagonally
+          adjacent. At each step in time, the following transitions occur: Any
+          live cell with fewer than two live neighbours dies, as if by
+          underpopulation. Any live cell with two or three live neighbours lives
+          on to the next generation. Any live cell with more than three live
+          neighbours dies, as if by overpopulation. Any dead cell with exactly
+          three live neighbours becomes a live cell, as if by reproduction.
+          These rules, which compare the behavior of the automaton to real life,
+          can be condensed into the following: Any live cell with two or three
+          live neighbours survives. Any dead cell with three live neighbours
+          becomes a live cell. All other live cells die in the next generation.
+          Similarly, all other dead cells stay dead. The initial pattern
+          constitutes the seed of the system. The first generation is created by
+          applying the above rules simultaneously to every cell in the seed;
+          births and deaths occur simultaneously, and the discrete moment at
+          which this happens is sometimes called a tick. Each generation is a
+          pure function of the preceding one. The rules continue to be applied
+          repeatedly to create further generations.
+        </p>
+        <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life#Rules">
+          {" "}
+          From Wikipedia
+        </a>
       </div>
     );
   }
 }
-
+// create a deep clone of the grid array using a function passing in the array by stringifying it and parsing it so we can update it indirectly (as it's a nested array we need to do a deep clone - cannot use .slice)
 function arrayClone(arr) {
   return JSON.parse(JSON.stringify(arr));
 }

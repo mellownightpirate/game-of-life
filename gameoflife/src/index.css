@@ -25,8 +25,11 @@ body {
 
 .center {
   margin: auto;
-  display: table;
+display: flex;
+justify-content: space-around;
+  /* display: table; */
   margin-top: 10px;
+  width: 80%;
 }
 
 .grid {
@@ -47,4 +50,14 @@ h1, h2, h3, h4 {
 
 h4 {
   margin-top: 0px;
+}
+
+p {
+  color: white;
+}
+
+.drpItm {
+display: flex;
+flex-direction: column;
+justify-content: center;
 }
