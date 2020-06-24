@@ -1,13 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import { ButtonToolbar, DropdownItem, DropdownButton } from "react-bootstrap";
+import { ButtonToolbar, Dropdown, DropdownButton } from "react-bootstrap";
 
 class Box extends React.Component {
   selectBox = () => {
     // call the function from the props
     this.props.selectBox(this.props.row, this.props.col);
-  };
+  }
   render() {
     return (
       <div
@@ -22,13 +22,13 @@ class Box extends React.Component {
 class Grid extends React.Component {
   render() {
     // cols passed as props to child component to give width of grid
-    const width = this.props.cols * 14;
+    const width = (this.props.cols * 14);
     // rows array initialised as empty array
     var rowsArr = [];
     // nested for loop to map an array of data for rows
     var boxClass = "";
     for (var i = 0; i < this.props.rows; i++) {
-      for (var j = 0; j < this.props.rows; j++) {
+      for (var j = 0; j < this.props.cols; j++) {
         // create the id to go along with each box element
         let boxId = i + "_" + j;
         // check to see if box is on or off
@@ -63,6 +63,7 @@ class Buttons extends React.Component {
   render() {
     return (
       <div className="center">
+        {/* using react bootstrap for styling buttons component */}
         <ButtonToolbar className="center">
           <button className="btn btn-default" onClick={this.props.playButton}>
             Play
@@ -82,16 +83,17 @@ class Buttons extends React.Component {
           <button className="btn btn-default" onClick={this.props.seed}>
             Seed
           </button>
-          <DropdownButton title="Grid Size" onSelect={this.handleSelect}>
-            <DropdownItem className="drpItm" eventKey="1">
-              25x25
-            </DropdownItem>
-            <DropdownItem className="drpItm" eventKey="2">
+          {/* button menu to change grid sizes */}
+          <DropdownButton title="Grid Size" id="size-menu" onSelect={this.handleSelect}>
+            <Dropdown.Item className="drpItm" eventKey="1">
+              20x10
+            </Dropdown.Item>
+            <Dropdown.Item className="drpItm" eventKey="2">
               50x30
-            </DropdownItem>
-            <DropdownItem className="drpItm" eventKey="3">
+            </Dropdown.Item>
+            <Dropdown.Item className="drpItm" eventKey="3">
               70x50
-            </DropdownItem>
+            </Dropdown.Item>
           </DropdownButton>
         </ButtonToolbar>
       </div>
@@ -115,7 +117,7 @@ class Main extends React.Component {
         .map(() => Array(this.cols).fill(false)),
     };
   }
-// each cell in the grid starts off as unselected (false). Create a method so that when clicked, each cell updates to true.
+  // each cell in the grid starts off as unselected (false). Create a method so that when clicked, each cell updates to true.
   selectBox = (row, col) => {
     // do not update the start directly so create a copy of the array using helper function arrayClone
     let gridCopy = arrayClone(this.state.gridFull);
@@ -126,7 +128,7 @@ class Main extends React.Component {
       gridFull: gridCopy,
     });
   };
-// custom feature that creates a random cell configuration that users can run
+  // custom feature that creates a random cell configuration that users can run
   seed = () => {
     // copy the grid
     let gridCopy = arrayClone(this.state.gridFull);
@@ -143,23 +145,29 @@ class Main extends React.Component {
       gridFull: gridCopy,
     });
   };
-// start the interval
+  // start the interval
   playButton = () => {
+    // stop the interval
     clearInterval(this.intervalId);
+    // start calling this.play at the interval this.speed
     this.intervalId = setInterval(this.play, this.speed);
   };
-
+  // pause the game
   pauseButton = () => {
     clearInterval(this.intervalId);
   };
 
   slow = () => {
+    // slow to 1000 milliseconds
     this.speed = 1000;
+    // slow the interval to this new speed
     this.playButton();
   };
 
   fast = () => {
+    // back to 100 milliseconds
     this.speed = 100;
+    // speed interval back to old speed
     this.playButton();
   };
 
@@ -167,17 +175,19 @@ class Main extends React.Component {
     var grid = Array(this.rows)
       .fill()
       .map(() => Array(this.cols).fill(false));
+    // update state to clear grid by updating cols and rows in grid array
     this.setState({
       gridFull: grid,
       generation: 0,
     });
   };
 
+  // function to change grid size
   gridSize = (size) => {
     switch (size) {
       case "1":
-        this.cols = 25;
-        this.rows = 25;
+        this.cols = 20;
+        this.rows = 10;
         break;
       case "2":
         this.cols = 50;
@@ -187,26 +197,32 @@ class Main extends React.Component {
         this.cols = 70;
         this.rows = 50;
     }
+    // reset everything
     this.clear();
   };
-
+  // the main function that makes the game actually work
   play = () => {
+    // we need two copies of the grid for changing the squares because we're going to check what the grid is currently like on line 197
     let g = this.state.gridFull;
+    // and then change the squares on the clone setting the state on the clone
     let g2 = arrayClone(this.state.gridFull);
 
     for (let i = 0; i < this.rows; i++) {
       for (let j = 0; j < this.cols; j++) {
+        // the count goes through how many neighbours each cell has
         let count = 0;
+        // if there is a neighbour then increase the count +1, since each cell has each 8 potential neighbours therefore there are 8 if statements(and/or nested if statements) to check each neighbour
         if (i > 0) if (g[i - 1][j]) count++;
-        if (i > 0 && j > 0) if (g[i - 1][j - 1]) count++;
-        if (i > 0 && j < this.cols - 1) if (g[i - 1][j + 1]) count++;
-        if (j < this.cols - 1) if (g[i][j + 1]) count++;
-        if (j > 0) if (g[i][j - 1]) count++;
-        if (i < this.rows - 1) if (g[i + 1][j]) count++;
-        if (i < this.rows - 1 && j > 0) if (g[i + 1][j - 1]) count++;
-        if (i < this.rows - 1 && j < this.cols - 1)
-          if (g[i + 1][j + 1]) count++;
+		    if (i > 0 && j > 0) if (g[i - 1][j - 1]) count++;
+		    if (i > 0 && j < this.cols - 1) if (g[i - 1][j + 1]) count++;
+		    if (j < this.cols - 1) if (g[i][j + 1]) count++;
+		    if (j > 0) if (g[i][j - 1]) count++;
+		    if (i < this.rows - 1) if (g[i + 1][j]) count++;
+		    if (i < this.rows - 1 && j > 0) if (g[i + 1][j - 1]) count++;
+		    if (i < this.rows - 1 && j < this.cols - 1) if (g[i + 1][j + 1]) count++;
+        // if there's less than two but more than three the cell dies as if by overpopulation
         if (g[i][j] && (count < 2 || count > 3)) g2[i][j] = false;
+        // if it's dead and there are exactly three live neughbours becomes a live cell, as if by reproduction
         if (!g[i][j] && count === 3) g2[i][j] = true;
       }
     }
@@ -217,7 +233,9 @@ class Main extends React.Component {
   };
   // start game on refresh
   componentDidMount() {
+    // seed game
     this.seed();
+    // start game
     this.playButton();
   }
 
@@ -267,7 +285,6 @@ class Main extends React.Component {
           repeatedly to create further generations.
         </p>
         <a href="https://en.wikipedia.org/wiki/Conway%27s_Game_of_Life#Rules">
-          {" "}
           From Wikipedia
         </a>
       </div>

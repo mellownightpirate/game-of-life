@@ -27,10 +27,10 @@ body {
   margin: auto;
 display: flex;
 justify-content: space-around;
-  /* display: table; */
   margin-top: 10px;
   width: 80%;
 }
+
 
 .grid {
   width: 150px;
@@ -60,4 +60,5 @@ p {
 display: flex;
 flex-direction: column;
 justify-content: center;
+align-items: center;
 }
